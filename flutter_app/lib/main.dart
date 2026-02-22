@@ -4,6 +4,7 @@ import 'dart:convert';
 
 void main() {
   runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
     home: MyApp(), // ลบ const ออกแล้ว
   ));
 }
