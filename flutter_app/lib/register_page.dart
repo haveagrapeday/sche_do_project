@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'task_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -21,9 +23,8 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  void _register() {
-    // ในตัวอย่างนี้เราจะไม่เชื่อมต่อกับ backend
-    // เพียงตรวจสอบรหัสผ่านตรงกัน จากนั้นไปหน้า Task
+  Future<void> _register() async {
+    // ตรวจสอบรหัสผ่านตรงกันก่อน
     if (_passwordController.text != _confirmController.text) {
       ScaffoldMessenger.of(
         context,
@@ -31,10 +32,41 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const TaskPage()),
+    final url = Uri.parse(
+      'http://10.0.2.2/sche_do_project/backend_api/register_user.php',
     );
+
+    try {
+      final response = await http.post(
+        url,
+        body: {
+          'username': _usernameController.text.trim(),
+          'password': _passwordController.text,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const TaskPage()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? 'Registration failed')),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Server error: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
   }
 
   @override
