@@ -49,23 +49,20 @@ class _TaskPageState extends State<TaskPage> {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-            onPressed: getTasks,
-            icon: const Icon(Icons.refresh),
-          ),
+          IconButton(onPressed: getTasks, icon: const Icon(Icons.refresh)),
         ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : tasks.isEmpty
-              ? _buildEmptyState()
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  itemCount: tasks.length,
-                  itemBuilder: (context, index) {
-                    return _buildTaskCard(tasks[index]);
-                  },
-                ),
+          ? _buildEmptyState()
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                return _buildTaskCard(tasks[index]);
+              },
+            ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           // ส่วนหน้าเพิ่มข้อมูล
@@ -81,7 +78,11 @@ class _TaskPageState extends State<TaskPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.calendar_today_outlined, size: 80, color: Colors.grey[400]),
+          Icon(
+            Icons.calendar_today_outlined,
+            size: 80,
+            color: Colors.grey[400],
+          ),
           const SizedBox(height: 16),
           Text(
             "ยังไม่มีการนัดหมาย",

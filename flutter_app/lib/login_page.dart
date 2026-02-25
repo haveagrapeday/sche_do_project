@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'task_page.dart'; // import เพื่อไปหน้า Task
+import 'register_page.dart'; // import เพื่อไปหน้า Register
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,7 +28,9 @@ class _LoginPageState extends State<LoginPage> {
             TextField(
               decoration: InputDecoration(
                 labelText: "Username",
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -35,7 +38,9 @@ class _LoginPageState extends State<LoginPage> {
               obscureText: true,
               decoration: InputDecoration(
                 labelText: "Password",
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
             const SizedBox(height: 30),
@@ -52,6 +57,24 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 child: const Text("Login", style: TextStyle(fontSize: 18)),
               ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Don't have an account? "),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterPage(),
+                      ),
+                    );
+                  },
+                  child: const Text("Register"),
+                ),
+              ],
             ),
           ],
         ),
