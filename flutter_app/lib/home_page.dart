@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'task_page.dart';
 import 'login_page.dart';
+import 'setting_page.dart';
+import 'create_task_page.dart';
+import 'calendar_page.dart';
 
 class HomePage extends StatefulWidget {
   final String? username;
@@ -269,8 +272,11 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: InkWell(
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Create Task')),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CreateTaskPage(),
+                      ),
                     );
                   },
                   child: Column(
@@ -286,9 +292,12 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: InkWell(
                   onTap: () {
-                    ScaffoldMessenger.of(
+                    Navigator.push(
                       context,
-                    ).showSnackBar(const SnackBar(content: Text('Calendar')));
+                      MaterialPageRoute(
+                        builder: (context) => const CalendarPage(),
+                      ),
+                    );
                   },
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -303,9 +312,12 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: InkWell(
                   onTap: () {
-                    ScaffoldMessenger.of(
+                    Navigator.push(
                       context,
-                    ).showSnackBar(const SnackBar(content: Text('Settings')));
+                      MaterialPageRoute(
+                        builder: (context) => const SettingPage(),
+                      ),
+                    );
                   },
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
