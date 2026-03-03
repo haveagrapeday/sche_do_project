@@ -14,7 +14,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Sche-Do Project',
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
-      // เริ่มต้นที่หน้า Login
       home: const LoginPage(),
     );
   }

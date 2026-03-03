@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'task_page.dart'; // import เพื่อไปหน้า Task
+import 'home_page.dart'; // import เพื่อไปหน้า Home
 import 'register_page.dart'; // import เพื่อไปหน้า Register
 
 class LoginPage extends StatefulWidget {
@@ -49,10 +49,10 @@ class _LoginPageState extends State<LoginPage> {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  // เมื่อกด Login ให้ย้ายไปหน้า TaskPage
+                  // เมื่อกด Login ให้ย้ายไปหน้า HomePage
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const TaskPage()),
+                    MaterialPageRoute(builder: (context) => const HomePage()),
                   );
                 },
                 child: const Text("Login", style: TextStyle(fontSize: 18)),
