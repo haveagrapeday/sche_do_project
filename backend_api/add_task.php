@@ -17,11 +17,11 @@ if (empty($subject) || empty($app_date) || empty($app_time)) {
 
 // sanitize inputs
 $subject = $conn->real_escape_string($subject);
-$description = $conn->real_escape_string($description);
 $app_date = $conn->real_escape_string($app_date);
 $app_time = $conn->real_escape_string($app_time);
+$description = $conn->real_escape_string($description);
 
-$sql = "INSERT INTO tasks (subject, description, app_date, app_time) VALUES ('$subject', '$description', '$app_date', '$app_time')";
+$sql = "INSERT INTO tasks (subject, app_date, app_time, description) VALUES ('$subject', '$app_date', '$app_time', '$description')";
 
 if ($conn->query($sql)) {
     echo json_encode(['success' => true, 'message' => 'Task added']);

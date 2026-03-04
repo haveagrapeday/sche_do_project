@@ -89,20 +89,6 @@ class _SettingPageState extends State<SettingPage> {
               ],
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Profile preview',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.person),
-                title: Text(_nameCtrl.text.isEmpty ? 'User' : _nameCtrl.text),
-                subtitle: Text(
-                  _emailCtrl.text.isEmpty ? 'No email' : _emailCtrl.text,
-                ),
-              ),
-            ),
           ],
         ),
       ),
