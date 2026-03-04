@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class CreateTaskPage extends StatefulWidget {
   const CreateTaskPage({super.key});
@@ -31,7 +33,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     if (t != null) setState(() => _selectedTime = t);
   }
 
-  void _save() {
+  Future<void> _save() async {
     final title = _titleCtrl.text.trim();
     if (title.isEmpty) {
       ScaffoldMessenger.of(
@@ -39,10 +41,51 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       ).showSnackBar(const SnackBar(content: Text('Please enter a title')));
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Task created')));
-    Navigator.pop(context);
+
+    if (_selectedDate == null || _selectedTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select date and time')),
+      );
+      return;
+    }
+
+    // prepare payload
+    final url = Uri.parse(
+      'http://10.0.2.2/sche_do_project/backend_api/add_task.php',
+    );
+    try {
+      final response = await http.post(
+        url,
+        body: {
+          'subject': title,
+          'description': _descCtrl.text.trim(),
+          'app_date': '${_selectedDate!.toLocal()}'.split(' ')[0],
+          'app_time': _selectedTime!.format(context),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        if (result['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Task added successfully')),
+          );
+          Navigator.pop(context, true); // pass flag to refresh
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(result['message'] ?? 'Error')));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Server error: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Network error: $e')));
+    }
   }
 
   @override

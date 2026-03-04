@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:schedule_prototype2/home_page.dart';
 import 'dart:convert';
 import 'task_page.dart';
 
@@ -50,7 +51,7 @@ class _RegisterPageState extends State<RegisterPage> {
         if (data['success'] == true) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const TaskPage()),
+            MaterialPageRoute(builder: (context) => const HomePage()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

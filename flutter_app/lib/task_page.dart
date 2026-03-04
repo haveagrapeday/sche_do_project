@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'detail_page.dart';
+import 'create_task_page.dart';
 
 class TaskPage extends StatefulWidget {
   const TaskPage({super.key});
@@ -64,8 +66,15 @@ class _TaskPageState extends State<TaskPage> {
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // ส่วนหน้าเพิ่มข้อมูล
+        onPressed: () async {
+          // navigate to create task page and refresh list when a new task is added
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CreateTaskPage()),
+          );
+          if (result == true) {
+            getTasks();
+          }
         },
         label: const Text("เพิ่มนัดหมาย"),
         icon: const Icon(Icons.add),
@@ -94,45 +103,54 @@ class _TaskPageState extends State<TaskPage> {
   }
 
   Widget _buildTaskCard(Map item) {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    item['subject'] ?? 'ไม่มีหัวข้อ',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.indigo,
+    // Wrap card in InkWell to handle taps and navigate to detail page
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => DetailPage(task: item)),
+        );
+      },
+      child: Card(
+        elevation: 2,
+        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      item['subject'] ?? 'ไม่มีหัวข้อ',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.indigo,
+                      ),
                     ),
                   ),
-                ),
-                const Icon(Icons.more_vert),
-              ],
-            ),
-            const Divider(height: 20),
-            Text(
-              item['description'] ?? '',
-              style: TextStyle(color: Colors.grey[700], fontSize: 15),
-            ),
-            const SizedBox(height: 15),
-            Row(
-              children: [
-                _buildInfoTag(Icons.calendar_month, item['app_date'] ?? '-'),
-                const SizedBox(width: 15),
-                _buildInfoTag(Icons.access_time, item['app_time'] ?? '-'),
-              ],
-            ),
-          ],
+                  const Icon(Icons.more_vert),
+                ],
+              ),
+              const Divider(height: 20),
+              Text(
+                item['description'] ?? '',
+                style: TextStyle(color: Colors.grey[700], fontSize: 15),
+              ),
+              const SizedBox(height: 15),
+              Row(
+                children: [
+                  _buildInfoTag(Icons.calendar_month, item['app_date'] ?? '-'),
+                  const SizedBox(width: 15),
+                  _buildInfoTag(Icons.access_time, item['app_time'] ?? '-'),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
