@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class CreateTaskPage extends StatefulWidget {
   const CreateTaskPage({super.key});
@@ -10,151 +8,96 @@ class CreateTaskPage extends StatefulWidget {
 }
 
 class _CreateTaskPageState extends State<CreateTaskPage> {
-  final TextEditingController _titleCtrl = TextEditingController();
-  final TextEditingController _descCtrl = TextEditingController();
-  DateTime? _selectedDate;
-  TimeOfDay? _selectedTime;
-
-  Future<void> _pickDate() async {
-    final d = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (d != null) setState(() => _selectedDate = d);
-  }
-
-  Future<void> _pickTime() async {
-    final t = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (t != null) setState(() => _selectedTime = t);
-  }
-
-  Future<void> _save() async {
-    final title = _titleCtrl.text.trim();
-    if (title.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter a title')));
-      return;
-    }
-
-    if (_selectedDate == null || _selectedTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select date and time')),
-      );
-      return;
-    }
-
-    // prepare payload
-    final url = Uri.parse(
-      'http://10.0.2.2/sche_do_project/backend_api/add_task.php',
-    );
-    try {
-      final response = await http.post(
-        url,
-        body: {
-          'subject': title,
-          'description': _descCtrl.text.trim(),
-          'app_date': '${_selectedDate!.toLocal()}'.split(' ')[0],
-          'app_time': _selectedTime!.format(context),
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body);
-        if (result['success'] == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Task added successfully')),
-          );
-          Navigator.pop(context, true); // pass flag to refresh
-        } else {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(result['message'] ?? 'Error')));
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Server error: ${response.statusCode}')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Network error: $e')));
-    }
-  }
-
-  @override
-  void dispose() {
-    _titleCtrl.dispose();
-    _descCtrl.dispose();
-    super.dispose();
-  }
+  String selectedPriority = "Medium";
+  final Color primaryColor = const Color(0xFF26A69A);
 
   @override
   Widget build(BuildContext context) {
-    String dateText = _selectedDate == null
-        ? 'Select date'
-        : '${_selectedDate!.toLocal()}'.split(' ')[0];
-    String timeText = _selectedTime == null
-        ? 'Select time'
-        : _selectedTime!.format(context);
-
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Create Task'),
-        backgroundColor: Colors.indigo,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text("New Task", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: _titleCtrl,
-              decoration: InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _descCtrl,
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
+            _buildLabel("Title"),
+            _buildTextField("What needs to be done?"),
+            const SizedBox(height: 20),
+            _buildLabel("Description"),
+            _buildTextField("Add details...", maxLines: 4),
+            const SizedBox(height: 20),
+            _buildLabel("Priority"),
             Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _pickDate,
-                    child: Text(dateText),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _pickTime,
-                    child: Text(timeText),
-                  ),
-                ),
-              ],
+              children: ["Low", "Medium", "High"].map((p) => _priorityBtn(p)).toList(),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(onPressed: _save, child: const Text('Save')),
+            _buildLabel("Due Date"),
+            _buildTextField("03/04/2026", suffixIcon: Icons.calendar_today_outlined),
+            const SizedBox(height: 20),
+            _buildLabel("Category"),
+            _buildTextField("e.g. Work, Personal, Design"),
+            const SizedBox(height: 40),
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text("Create Task", style: TextStyle(fontSize: 18, color: Colors.white)),
+              ),
+            )
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+  );
+
+  Widget _buildTextField(String hint, {int maxLines = 1, IconData? suffixIcon}) {
+    return TextField(
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.grey[400]),
+        filled: true,
+        fillColor: Colors.grey[100],
+        suffixIcon: suffixIcon != null ? Icon(suffixIcon, size: 20) : null,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      ),
+    );
+  }
+
+  Widget _priorityBtn(String p) {
+    bool isSelected = selectedPriority == p;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => selectedPriority = p),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.orange : Colors.grey[100],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(
+            child: Text(p, style: TextStyle(color: isSelected ? Colors.white : Colors.grey[600], fontWeight: FontWeight.bold)),
+          ),
         ),
       ),
     );
