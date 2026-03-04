@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'login_page.dart';
 
 class SettingPage extends StatefulWidget {
   final String? name;
