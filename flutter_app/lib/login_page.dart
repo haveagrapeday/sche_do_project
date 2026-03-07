@@ -18,16 +18,12 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.lock_person, size: 100, color: Colors.indigo), //logo
-            const SizedBox(height: 30),
-            const Text("Welcome back", 
-            style: TextStyle(
-            fontSize: 32, 
-            fontWeight: FontWeight.bold
-              )
+            const Icon(Icons.lock_person, size: 100, color: Colors.indigo),
+            const SizedBox(height: 20),
+            const Text(
+              "Welcome Back",
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
-            const Text("Sign in to continue", style: TextStyle(color: Colors.grey)),
-
             const SizedBox(height: 40),
             TextField(
               decoration: InputDecoration(
@@ -59,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
                     MaterialPageRoute(builder: (context) => const HomePage()),
                   );
                 },
-                child: const Text("Sign In", style: TextStyle(fontSize: 18)),
+                child: const Text("Login", style: TextStyle(fontSize: 18)),
               ),
             ),
             const SizedBox(height: 10),
