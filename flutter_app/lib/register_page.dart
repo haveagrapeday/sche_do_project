@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:schedule_prototype2/home_page.dart';
-import 'package:schedule_prototype2/login_page.dart';
 import 'dart:convert';
 import 'task_page.dart';
 
@@ -125,24 +124,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 onPressed: _register,
                 child: const Text("Register", style: TextStyle(fontSize: 18)),
               ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("I have an account "),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                    );
-                  },
-                  child: const Text("Signin"),
-                ),
-              ],
             ),
           ],
         ),
