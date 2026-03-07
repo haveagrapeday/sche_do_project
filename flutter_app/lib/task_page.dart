@@ -29,7 +29,7 @@ class _TaskPageState extends State<TaskPage> {
         });
       }
     } catch (e) {
-      debugPrint("Error fetching tasks: $e");
+      print("Error: $e");
       setState(() => isLoading = false);
     }
   }
@@ -57,31 +57,27 @@ class _TaskPageState extends State<TaskPage> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : tasks.isEmpty
-              ? _buildEmptyState()
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  itemCount: tasks.length,
-                  itemBuilder: (context, index) {
-                    return _buildTaskCard(tasks[index]);
-                  },
-                ),
+          ? _buildEmptyState()
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                return _buildTaskCard(tasks[index]);
+              },
+            ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          // รอผลลัพธ์จากการบันทึกข้อมูล
+          // navigate to create task page and refresh list when a new task is added
           final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const CreateTaskPage()),
           );
-          
-          // ถ้ากลับมาพร้อมค่า true แสดงว่าบันทึกสำเร็จ ให้ดึงข้อมูลใหม่
           if (result == true) {
             getTasks();
           }
         },
         label: const Text("เพิ่มนัดหมาย"),
         icon: const Icon(Icons.add),
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
       ),
     );
   }
@@ -91,7 +87,11 @@ class _TaskPageState extends State<TaskPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.calendar_today_outlined, size: 80, color: Colors.grey[400]),
+          Icon(
+            Icons.calendar_today_outlined,
+            size: 80,
+            color: Colors.grey[400],
+          ),
           const SizedBox(height: 16),
           Text(
             "ยังไม่มีการนัดหมาย",
@@ -103,6 +103,7 @@ class _TaskPageState extends State<TaskPage> {
   }
 
   Widget _buildTaskCard(Map item) {
+    // Wrap card in InkWell to handle taps and navigate to detail page
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -132,7 +133,7 @@ class _TaskPageState extends State<TaskPage> {
                       ),
                     ),
                   ),
-                  const Icon(Icons.chevron_right, color: Colors.grey),
+                  const Icon(Icons.more_vert),
                 ],
               ),
               const Divider(height: 20),
