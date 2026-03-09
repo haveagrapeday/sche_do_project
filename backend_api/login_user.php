@@ -20,7 +20,7 @@ if (empty($username) || empty($password)) {
 // sanitize input (trim เพิ่มความแน่ใจว่าไม่มีช่องว่างแปลกๆ)
 $username = trim($conn->real_escape_string($username));
 
-$sql = "SELECT user_id, password FROM users WHERE username = '$username' LIMIT 1";
+$sql = "SELECT user_id, password, profile_image FROM users WHERE username = '$username' LIMIT 1";
 $result = $conn->query($sql);
 
 if ($result && $result->num_rows === 1) {
@@ -37,6 +37,7 @@ if ($result && $result->num_rows === 1) {
             'user_id' => $row['user_id'],
             'username' => $username,
             'email' => $row['email'] ?? '',
+            'profile_image' => $row['profile_image'] ?? null,
         ]);
         $conn->close();
         exit;
