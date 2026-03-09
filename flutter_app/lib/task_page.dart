@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'detail_page.dart';
 import 'create_task_page.dart';
@@ -17,8 +18,21 @@ class _TaskPageState extends State<TaskPage> {
 
   Future<void> getTasks() async {
     setState(() => isLoading = true);
+
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id');
+
+    if (userId == null || userId.isEmpty) {
+      // No logged in user; show no tasks.
+      setState(() {
+        tasks = [];
+        isLoading = false;
+      });
+      return;
+    }
+
     final url = Uri.parse(
-      'http://10.0.2.2/sche_do_project/backend_api/get_tasks.php',
+      'http://10.0.2.2/sche_do_project/backend_api/get_tasks.php?user_id=$userId',
     );
     try {
       final response = await http.get(url);
@@ -27,9 +41,11 @@ class _TaskPageState extends State<TaskPage> {
           tasks = json.decode(response.body);
           isLoading = false;
         });
+      } else {
+        setState(() => isLoading = false);
       }
     } catch (e) {
-      print("Error: $e");
+      debugPrint("Error: $e");
       setState(() => isLoading = false);
     }
   }

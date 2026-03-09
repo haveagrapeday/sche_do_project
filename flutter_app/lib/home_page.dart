@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'task_page.dart';
-import 'login_page.dart';
 import 'setting_page.dart';
 import 'create_task_page.dart';
 import 'calendar_page.dart';

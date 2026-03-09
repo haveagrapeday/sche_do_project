@@ -4,7 +4,16 @@ header("Content-Type: application/json; charset=UTF-8");
 
 include 'db_config.php';
 
-$sql = "SELECT * FROM tasks";
+// Allow filtering tasks by user_id (sent from the Flutter app)
+$user_id = $_GET['user_id'] ?? $_POST['user_id'] ?? '';
+
+if (!empty($user_id)) {
+    $user_id = $conn->real_escape_string($user_id);
+    $sql = "SELECT * FROM tasks WHERE user_id = '$user_id'";
+} else {
+    $sql = "SELECT * FROM tasks";
+}
+
 $result = $conn->query($sql);
 
 $tasks = array();
