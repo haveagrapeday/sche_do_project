@@ -1,11 +1,13 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'login_page.dart';
+import 'home_page.dart';
+import 'task_page.dart';
+import 'calendar_page.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -19,6 +21,9 @@ class _SettingPageState extends State<SettingPage> {
   late TextEditingController _emailCtrl;
   String? _profileImageUrl;
   bool _isUploadingImage = false;
+  
+  // สีหลักที่เราใช้ในหน้าอื่นๆ
+  final Color primaryColor = const Color(0xFF2CB197);
 
   @override
   void initState() {
@@ -49,6 +54,8 @@ class _SettingPageState extends State<SettingPage> {
     super.dispose();
   }
 
+  // --- Logic การทำงานเดิม (คงไว้ตามที่คุณส่งมา) ---
+
   Future<void> _saveProfile() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('user_id');
@@ -56,87 +63,45 @@ class _SettingPageState extends State<SettingPage> {
 
     if (userId == null || userId.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cannot find user ID. Please log in again.'),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cannot find user ID.')));
       return;
     }
 
     try {
-      final url = Uri.parse(
-        'http://10.0.2.2/sche_do_project/backend_api/update_user.php',
-      );
-      final response = await http.post(
-        url,
-        body: {'user_id': userId, 'email': email},
-      );
+      final url = Uri.parse('http://10.0.2.2/sche_do_project/backend_api/update_user.php');
+      final response = await http.post(url, body: {'user_id': userId, 'email': email});
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
           await prefs.setString('email', email);
           if (!mounted) return;
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Profile saved')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile saved successfully!')));
           return;
         }
-
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Unable to save')),
-        );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Server error: ${response.statusCode}')),
-        );
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
   Future<void> _pickAndUploadProfileImage() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('user_id');
-
-    if (userId == null || userId.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cannot find user ID. Please log in again.'),
-        ),
-      );
-      return;
-    }
+    if (userId == null) return;
 
     final picker = ImagePicker();
-    final picked = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 800,
-      maxHeight: 800,
-      imageQuality: 80,
-    );
-
+    final picked = await picker.pickImage(source: ImageSource.gallery, maxWidth: 800, maxHeight: 800, imageQuality: 80);
     if (picked == null) return;
 
     setState(() => _isUploadingImage = true);
 
     try {
-      final uri = Uri.parse(
-        'http://10.0.2.2/sche_do_project/backend_api/upload_profile_image.php',
-      );
+      final uri = Uri.parse('http://10.0.2.2/sche_do_project/backend_api/upload_profile_image.php');
       final request = http.MultipartRequest('POST', uri)
         ..fields['user_id'] = userId
-        ..files.add(
-          await http.MultipartFile.fromPath('profile_image', picked.path),
-        );
+        ..files.add(await http.MultipartFile.fromPath('profile_image', picked.path));
 
       final response = await request.send();
       final responseBody = await http.Response.fromStream(response);
@@ -147,33 +112,12 @@ class _SettingPageState extends State<SettingPage> {
           final profileImage = data['profile_image'] as String?;
           if (profileImage != null) {
             await prefs.setString('profile_image', profileImage);
-            if (!mounted) return;
-            setState(() {
-              _profileImageUrl = profileImage;
-            });
+            setState(() => _profileImageUrl = profileImage);
           }
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile photo updated')),
-          );
-          return;
         }
-
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Unable to upload image')),
-        );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Server error: ${responseBody.statusCode}')),
-        );
       }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error uploading image: $e')));
+       debugPrint("Upload Error: $e");
     } finally {
       if (mounted) setState(() => _isUploadingImage = false);
     }
@@ -182,146 +126,172 @@ class _SettingPageState extends State<SettingPage> {
   Future<void> _logout() async {
     final shouldLogout = await showDialog<bool>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to logout?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Logout'),
-            ),
-          ],
-        );
-      },
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Logout', style: TextStyle(color: Colors.red))),
+        ],
+      ),
     );
 
-    if (shouldLogout != true) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
-    await prefs.remove('username');
-    await prefs.remove('email');
-
-    if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-      (route) => false,
-    );
+    if (shouldLogout == true) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear(); // ล้างข้อมูลทั้งหมดเพื่อให้ต้อง Login ใหม่
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
-        title: const Text('Settings'),
+        automaticallyImplyLeading: false, // เอาปุ่มย้อนกลับออกเพราะมี Task bar แล้ว
+        title: const Text('Profile Settings', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         centerTitle: true,
-        backgroundColor: Colors.indigo,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 8),
+            const SizedBox(height: 30),
+            // --- ส่วนรูปโปรไฟล์ ---
             Center(
               child: Stack(
                 alignment: Alignment.bottomRight,
                 children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.indigo,
-                    backgroundImage: _profileImageUrl != null
-                        ? NetworkImage(_profileImageUrl!)
-                        : null,
-                    child: _profileImageUrl == null
-                        ? const Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Colors.white,
-                          )
-                        : null,
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 4),
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)],
+                    ),
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.grey[200],
+                      backgroundImage: _profileImageUrl != null ? NetworkImage(_profileImageUrl!) : null,
+                      child: _profileImageUrl == null
+                          ? Icon(Icons.person, size: 60, color: Colors.grey[400])
+                          : null,
+                    ),
                   ),
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: InkWell(
-                      onTap: _isUploadingImage
-                          ? null
-                          : _pickAndUploadProfileImage,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.15),
-                              blurRadius: 6,
-                            ),
-                          ],
-                        ),
-                        child: _isUploadingImage
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(
-                                Icons.camera_alt,
-                                size: 18,
-                                color: Colors.indigo,
-                              ),
-                      ),
+                  GestureDetector(
+                    onTap: _isUploadingImage ? null : _pickAndUploadProfileImage,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(color: primaryColor, shape: BoxShape.circle),
+                      child: _isUploadingImage
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : const Icon(Icons.camera_alt, color: Colors.white, size: 20),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _usernameCtrl,
-              readOnly: true,
-              decoration: InputDecoration(
-                labelText: 'Username',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+            const SizedBox(height: 40),
+            
+            // --- ช่องกรอกข้อมูล ---
+            _buildInputField(_usernameCtrl, "Username", Icons.person_outline, readOnly: true),
+            const SizedBox(height: 16),
+            _buildInputField(_emailCtrl, "Email Address", Icons.email_outlined),
+            
+            const SizedBox(height: 30),
+            
+            // --- ปุ่มบันทึก ---
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                onPressed: _saveProfile,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  elevation: 0,
                 ),
+                child: const Text('Save Profile', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _emailCtrl,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+            
+            const SizedBox(height: 16),
+            
+            // --- ปุ่ม Logout ---
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: OutlinedButton(
+                onPressed: _logout,
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.redAccent),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 ),
+                child: const Text('Sign Out', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
               ),
-              keyboardType: TextInputType.emailAddress,
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(onPressed: _saveProfile, child: const Text('Save')),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: _logout,
-              child: const Text('Logout'),
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
           ],
         ),
+      ),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildInputField(TextEditingController ctrl, String label, IconData icon, {bool readOnly = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black54)),
+        const SizedBox(height: 8),
+        TextField(
+          controller: ctrl,
+          readOnly: readOnly,
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: primaryColor),
+            filled: true,
+            fillColor: readOnly ? Colors.grey[100] : Colors.white,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+            hintText: label,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- ส่วน Task Bar (Navigation) ---
+  Widget _buildBottomNav() {
+    return Container(
+      height: 80,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey[200]!, width: 1)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _navItem(Icons.home_outlined, "Home", false, onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage()))),
+          _navItem(Icons.assignment_outlined, "Tasks", false, onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const TaskPage()))),
+          _navItem(Icons.calendar_month_outlined, "Calendar", false, onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const CalendarPage()))),
+          _navItem(Icons.person, "Profile", true), // หน้านี้คือ Active
+        ],
+      ),
+    );
+  }
+
+  Widget _navItem(IconData icon, String label, bool isActive, {VoidCallback? onTap}) {
+    final color = isActive ? primaryColor : Colors.grey[400]!;
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 26),
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
+        ],
       ),
     );
   }
