@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'task_page.dart';
 import 'login_page.dart';
 import 'setting_page.dart';
@@ -28,41 +30,7 @@ class _HomePageState extends State<HomePage> {
         elevation: 0,
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            onPressed: () {
-              // Logout functionality
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text("Logout"),
-                    content: const Text("Are you sure you want to logout?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Cancel"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.popUntil(context, (route) => false);
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginPage(),
-                            ),
-                          );
-                        },
-                        child: const Text("Logout"),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            icon: const Icon(Icons.logout),
-          ),
-        ],
+        actions: [],
       ),
       body: SingleChildScrollView(
         child: Padding(

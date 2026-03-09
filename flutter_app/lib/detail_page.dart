@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class DetailPage extends StatelessWidget {
   final Map task;
 
-  const DetailPage({Key? key, required this.task}) : super(key: key);
+  const DetailPage({super.key, required this.task});
 
   @override
   Widget build(BuildContext context) {

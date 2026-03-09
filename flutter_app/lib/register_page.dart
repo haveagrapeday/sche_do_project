@@ -1,8 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:schedule_prototype2/home_page.dart';
-import 'dart:convert';
-import 'task_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'home_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -13,12 +15,14 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
 
   @override
   void dispose() {
     _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
     super.dispose();
@@ -43,21 +47,31 @@ class _RegisterPageState extends State<RegisterPage> {
         body: {
           'username': _usernameController.text.trim(),
           'password': _passwordController.text,
+          'email': _emailController.text.trim(),
         },
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('username', _usernameController.text.trim());
+          await prefs.setString('email', _emailController.text.trim());
+
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
+            MaterialPageRoute(
+              builder: (context) =>
+                  HomePage(username: _usernameController.text.trim()),
+            ),
           );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? 'Registration failed')),
-          );
+          return;
         }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? 'Registration failed')),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Server error: ${response.statusCode}')),
@@ -89,6 +103,17 @@ class _RegisterPageState extends State<RegisterPage> {
               controller: _usernameController,
               decoration: InputDecoration(
                 labelText: "Username",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: "Email",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
