@@ -75,6 +75,9 @@ class _LoginPageState extends State<LoginPage> {
           if (data['user_id'] != null) {
             await prefs.setString('user_id', data['user_id'].toString());
           }
+          if (data['email'] != null) {
+            await prefs.setString('email', data['email']);
+          }
 
           if (!mounted) return;
           Navigator.pushReplacement(

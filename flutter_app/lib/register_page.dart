@@ -57,6 +57,9 @@ class _RegisterPageState extends State<RegisterPage> {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('username', _usernameController.text.trim());
           await prefs.setString('email', _emailController.text.trim());
+          if (data['user_id'] != null) {
+            await prefs.setString('user_id', data['user_id'].toString());
+          }
 
           if (!mounted) return;
           Navigator.pushReplacement(

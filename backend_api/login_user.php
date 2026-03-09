@@ -36,6 +36,7 @@ if ($result && $result->num_rows === 1) {
             'token' => $token,
             'user_id' => $row['user_id'],
             'username' => $username,
+            'email' => $row['email'] ?? '',
         ]);
         $conn->close();
         exit;
