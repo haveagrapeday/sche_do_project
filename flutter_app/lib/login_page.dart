@@ -57,7 +57,9 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final url = Uri.parse('http://10.0.2.2/sche_do_project/backend_api/login_user.php');
+      final url = Uri.parse(
+        'http://10.0.2.2/sche_do_project/backend_api/login_user.php',
+      );
       final response = await http.post(
         url,
         body: {'username': username, 'password': password},
@@ -69,14 +71,22 @@ class _LoginPageState extends State<LoginPage> {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', data['token']);
           await prefs.setString('username', username);
-          if (data['user_id'] != null) await prefs.setString('user_id', data['user_id'].toString());
-          if (data['profile_image'] != null) await prefs.setString('profile_image', data['profile_image'].toString());
-          if (data['email'] != null) await prefs.setString('email', data['email']);
+          if (data['user_id'] != null)
+            await prefs.setString('user_id', data['user_id'].toString());
+          if (data['profile_image'] != null)
+            await prefs.setString(
+              'profile_image',
+              data['profile_image'].toString(),
+            );
+          if (data['email'] != null)
+            await prefs.setString('email', data['email']);
 
           if (!mounted) return;
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => HomePage(username: username)),
+            MaterialPageRoute(
+              builder: (context) => HomePage(username: username),
+            ),
           );
           return;
         }
@@ -111,16 +121,21 @@ class _LoginPageState extends State<LoginPage> {
               // --- Logo Section ---
               Container(
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: primaryColor.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
+                child: Image.asset(
+                  'assets/images/icon.png',
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.contain,
                 ),
-                child: Icon(Icons.check_circle_rounded, size: 80, color: primaryColor),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 10),
               const Text(
-                "Welcome back",
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -0.5),
+                "Welcome",
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -149,7 +164,10 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.only(top: 16),
                   child: Text(
                     _errorMessage!,
-                    style: const TextStyle(color: Colors.redAccent, fontSize: 14),
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
 
@@ -163,18 +181,27 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: _isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                     elevation: 0,
                   ),
                   child: _isLoading
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
                         )
                       : const Text(
                           "Sign In",
-                          style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                 ),
               ),
@@ -185,17 +212,25 @@ class _LoginPageState extends State<LoginPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Don't have an account? ", style: TextStyle(color: Colors.grey[600])),
+                  Text(
+                    "Don't have an account? ",
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const RegisterPage()),
+                        MaterialPageRoute(
+                          builder: (context) => const RegisterPage(),
+                        ),
                       );
                     },
                     child: Text(
                       "Sign Up",
-                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -230,7 +265,9 @@ class _LoginPageState extends State<LoginPage> {
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
-                    _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                    _isPasswordVisible
+                        ? Icons.visibility_off
+                        : Icons.visibility,
                     color: Colors.grey,
                   ),
                   onPressed: () {
@@ -239,7 +276,10 @@ class _LoginPageState extends State<LoginPage> {
                 )
               : null,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 18,
+            horizontal: 20,
+          ),
         ),
       ),
     );
