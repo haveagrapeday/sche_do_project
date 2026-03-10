@@ -11,4 +11,4 @@ Project Application : Task Management
 **Check API:** [http://localhost/sche_do_project/backend_api/get_tasks.php](http://localhost/sche_do_project/backend_api/get_tasks.php)
 
 
-<img width="1238" height="891" alt="Sche_Do" src="https://github.com/user-attachments/assets/cda54659-15b0-46da-8ec8-bf5c68af86ea" />
+<img width="2000" height="1414" alt="ดีไซน์ที่ยังไม่ได้ตั้งชื่อ" src="https://github.com/user-attachments/assets/ffd84cb1-9d84-4a85-b233-098c6bb58310" />
