@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class EditTaskPage extends StatefulWidget {
   final Map task;
@@ -14,7 +13,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
   late TextEditingController _titleCtrl;
   late TextEditingController _descCtrl;
   late TextEditingController _catCtrl;
-  
+
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   String _priority = "Medium";
@@ -34,16 +33,21 @@ class _EditTaskPageState extends State<EditTaskPage> {
     _status = widget.task['status'] ?? "Pending";
 
     // จัดการเรื่องวันที่เดิม
-    if (widget.task['app_date'] != null && widget.task['app_date'] != "0000-00-00") {
+    if (widget.task['app_date'] != null &&
+        widget.task['app_date'] != "0000-00-00") {
       _selectedDate = DateTime.parse(widget.task['app_date']);
     } else {
       _selectedDate = DateTime.now();
     }
 
     // จัดการเรื่องเวลาเดิม
-    if (widget.task['app_time'] != null && widget.task['app_time'] != "00:00:00") {
+    if (widget.task['app_time'] != null &&
+        widget.task['app_time'] != "00:00:00") {
       final parts = widget.task['app_time'].toString().split(':');
-      _selectedTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+      _selectedTime = TimeOfDay(
+        hour: int.parse(parts[0]),
+        minute: int.parse(parts[1]),
+      );
     } else {
       _selectedTime = TimeOfDay.now();
     }
@@ -70,26 +74,33 @@ class _EditTaskPageState extends State<EditTaskPage> {
   Future<void> _updateTask() async {
     setState(() => _isSaving = true);
     try {
-      final url = Uri.parse('http://10.0.2.2/sche_do_project/backend_api/update_task.php');
-      
-      // ฟอร์แมตวันที่และเวลาส่งไป Database
-      final dateStr = "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
-      final timeStr = "${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}:00";
+      final url = Uri.parse(
+        'http://10.0.2.2/sche_do_project/backend_api/update_task.php',
+      );
 
-      final response = await http.post(url, body: {
-        'task_id': widget.task['id'].toString(),
-        'subject': _titleCtrl.text.trim(),
-        'description': _descCtrl.text.trim(),
-        'category': _catCtrl.text.trim(),
-        'priority': _priority,
-        'status': _status,
-        'app_date': dateStr,
-        'app_time': timeStr,
-      });
+      // ฟอร์แมตวันที่และเวลาส่งไป Database
+      final dateStr =
+          "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
+      final timeStr =
+          "${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}:00";
+
+      final response = await http.post(
+        url,
+        body: {
+          'task_id': widget.task['id'].toString(),
+          'subject': _titleCtrl.text.trim(),
+          'description': _descCtrl.text.trim(),
+          'category': _catCtrl.text.trim(),
+          'priority': _priority,
+          'status': _status,
+          'app_date': dateStr,
+          'app_time': timeStr,
+        },
+      );
 
       if (response.statusCode == 200) {
         if (!mounted) return;
-        Navigator.pop(context, true); 
+        Navigator.pop(context, true);
       }
     } catch (e) {
       debugPrint("Error: $e");
@@ -103,7 +114,10 @@ class _EditTaskPageState extends State<EditTaskPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Edit Task", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Edit Task",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -123,22 +137,44 @@ class _EditTaskPageState extends State<EditTaskPage> {
             const SizedBox(height: 20),
             Row(
               children: [
-                Expanded(child: _buildPickerCard("Date", _selectedDate!.toIso8601String().split('T')[0], Icons.calendar_today, _pickDate)),
+                Expanded(
+                  child: _buildPickerCard(
+                    "Date",
+                    _selectedDate!.toIso8601String().split('T')[0],
+                    Icons.calendar_today,
+                    _pickDate,
+                  ),
+                ),
                 const SizedBox(width: 15),
-                Expanded(child: _buildPickerCard("Time", _selectedTime!.format(context), Icons.access_time, _pickTime)),
+                Expanded(
+                  child: _buildPickerCard(
+                    "Time",
+                    _selectedTime!.format(context),
+                    Icons.access_time,
+                    _pickTime,
+                  ),
+                ),
               ],
             ),
 
             const SizedBox(height: 20),
             _buildLabel("Priority"),
             Row(
-              children: ["Low", "Medium", "High"].map((p) => _buildChoiceChip(p, isPriority: true)).toList(),
+              children: [
+                "Low",
+                "Medium",
+                "High",
+              ].map((p) => _buildChoiceChip(p, isPriority: true)).toList(),
             ),
 
             const SizedBox(height: 20),
             _buildLabel("Status"),
             Row(
-              children: ["Pending", "In Progress", "Completed"].map((s) => _buildChoiceChip(s, isPriority: false)).toList(),
+              children: [
+                "Pending",
+                "In Progress",
+                "Completed",
+              ].map((s) => _buildChoiceChip(s, isPriority: false)).toList(),
             ),
 
             const SizedBox(height: 20),
@@ -153,14 +189,23 @@ class _EditTaskPageState extends State<EditTaskPage> {
                 onPressed: _isSaving ? null : _updateTask,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                   elevation: 0,
                 ),
-                child: _isSaving 
-                  ? const CircularProgressIndicator(color: Colors.white) 
-                  : const Text("Save Changes", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                child: _isSaving
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        "Save Changes",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -168,9 +213,19 @@ class _EditTaskPageState extends State<EditTaskPage> {
   }
 
   // --- Helpers Widgets ---
-  Widget _buildLabel(String text) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)));
+  Widget _buildLabel(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      text,
+      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+    ),
+  );
 
-  Widget _buildTextField(TextEditingController ctrl, String hint, {int maxLines = 1}) {
+  Widget _buildTextField(
+    TextEditingController ctrl,
+    String hint, {
+    int maxLines = 1,
+  }) {
     return TextField(
       controller: ctrl,
       maxLines: maxLines,
@@ -178,12 +233,20 @@ class _EditTaskPageState extends State<EditTaskPage> {
         hintText: hint,
         filled: true,
         fillColor: const Color(0xFFF1F4F7),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }
 
-  Widget _buildPickerCard(String label, String value, IconData icon, VoidCallback onTap) {
+  Widget _buildPickerCard(
+    String label,
+    String value,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -192,8 +255,17 @@ class _EditTaskPageState extends State<EditTaskPage> {
           onTap: onTap,
           child: Container(
             padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(color: const Color(0xFFF1F4F7), borderRadius: BorderRadius.circular(15)),
-            child: Row(children: [Icon(icon, size: 18, color: primaryColor), const SizedBox(width: 10), Text(value)]),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F4F7),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: 18, color: primaryColor),
+                const SizedBox(width: 10),
+                Text(value),
+              ],
+            ),
           ),
         ),
       ],
@@ -207,7 +279,8 @@ class _EditTaskPageState extends State<EditTaskPage> {
       child: ChoiceChip(
         label: Text(label),
         selected: isSelected,
-        onSelected: (val) => setState(() => isPriority ? _priority = label : _status = label),
+        onSelected: (val) =>
+            setState(() => isPriority ? _priority = label : _status = label),
         selectedColor: primaryColor,
         labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black),
       ),

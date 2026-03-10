@@ -71,15 +71,18 @@ class _LoginPageState extends State<LoginPage> {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', data['token']);
           await prefs.setString('username', username);
-          if (data['user_id'] != null)
+          if (data['user_id'] != null) {
             await prefs.setString('user_id', data['user_id'].toString());
-          if (data['profile_image'] != null)
+          }
+          if (data['profile_image'] != null) {
             await prefs.setString(
               'profile_image',
               data['profile_image'].toString(),
             );
-          if (data['email'] != null)
+          }
+          if (data['email'] != null) {
             await prefs.setString('email', data['email']);
+          }
 
           if (!mounted) return;
           Navigator.pushReplacement(

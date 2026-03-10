@@ -2,7 +2,6 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
-// ตรวจสอบชื่อไฟล์ config ของคุณให้ตรง (ก่อนหน้านี้คุณใช้ db_connect.php)
 include 'db_config.php'; 
 
 // Retrieve POST data safely
